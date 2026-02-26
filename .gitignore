@@ -1,8 +1,10 @@
 # secrets must never be committed
-secrets/*
-!.gitkeep
 
-srcs/.env
+# I NEED TO UNCOMENT THIS BEFORE EVAL
+# secrets/*
+# !.gitkeep
+
+# srcs/.env
 
 # OS/editor
 .DS_Store
