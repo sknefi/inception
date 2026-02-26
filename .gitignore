@@ -1,0 +1,9 @@
+# secrets must never be committed
+secrets/*
+!.gitkeep
+
+srcs/.env
+
+# OS/editor
+.DS_Store
+*.swp
