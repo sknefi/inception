@@ -1,0 +1,18 @@
+
+[mysqld]
+# --- Networking (allow wordpress container to connect) ---
+bind-address = 0.0.0.0
+port = 3306
+
+# --- Paths (match my volume mount) ---
+datadir   = /var/lib/mysql
+socket    = /run/mysqld/mysqld.sock
+pid-file  = /run/mysqld/mysqld.pid
+
+# --- WordPress-friendly defaults ---
+character-set-server = utf8mb4
+collation-server     = utf8mb4_unicode_ci
+
+# --- Sensible container defaults ---
+skip-name-resolve
+innodb_file_per_table = 1
