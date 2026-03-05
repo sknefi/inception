@@ -33,6 +33,12 @@ until mysqladmin ping -h "$DB_HOST" --silent; do
   sleep 2
 done
 
+# Avoid race with MariaDB init: wait until app credentials can query target DB.
+echo "[wp] Waiting for DB credentials to be ready..." >&2
+until mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "SELECT 1" >/dev/null 2>&1; do
+  sleep 2
+done
+
 cd /var/www/html
 
 # One-time core download into the mounted volume
@@ -74,4 +80,6 @@ fi
 chown -R www-data:www-data /var/www/html
 
 echo "[wp] Starting php-fpm" >&2
+mkdir -p /run/php
+rm -f /run/php/php7.4-fpm.pid
 exec php-fpm7.4 -F
