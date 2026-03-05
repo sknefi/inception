@@ -27,23 +27,17 @@ DB_USER_PASSWORD=$(cat "$USER_PWD_FILE")
 chown -R mysql:mysql /var/lib/mysql /run/mysqld
 
 # --- First-run initialisation ----------------------------------------------
-if [ ! -d /var/lib/mysql/mysql ]; then
-  echo "[mariadb] Initialising data directory" >&2
-  mariadb-install-db --user=mysql --datadir=/var/lib/mysql --skip-test-db >/dev/null
-
-  BOOTSTRAP_SQL=$(mktemp)
-  cat > "$BOOTSTRAP_SQL" <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
+if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE}" ]; then
+  echo "[mariadb] Creating missing database ${MYSQL_DATABASE}" >&2
+  TMP_SQL=$(mktemp)
+  cat > "$TMP_SQL" <<EOF
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
 GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
-
-  # --bootstrap starts mysqld just long enough to run the SQL, with networking disabled.
-  mysqld --user=mysql --datadir=/var/lib/mysql --bootstrap < "$BOOTSTRAP_SQL"
-  rm -f "$BOOTSTRAP_SQL"
-  echo "[mariadb] Database and user prepared" >&2
+  mysqld --user=mysql --datadir=/var/lib/mysql --bootstrap < "$TMP_SQL"
+  rm -f "$TMP_SQL"
 fi
 
 echo "[mariadb] Starting server" >&2
