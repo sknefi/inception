@@ -6,8 +6,8 @@ set -eu
 # Docker secrets, creates the WordPress database/user from env vars, then
 # launches mysqld in the foreground for Docker.
 
-ROOT_PWD_FILE=/run/secrets/db_root_password
-USER_PWD_FILE=/run/secrets/db_password
+ROOT_PWD_FILE=/run/secrets/db_root_password.txt
+USER_PWD_FILE=/run/secrets/db_password.txt
 
 # --- Guardrails -------------------------------------------------------------
 if [ -z "${MYSQL_DATABASE:-}" ] || [ -z "${MYSQL_USER:-}" ]; then
