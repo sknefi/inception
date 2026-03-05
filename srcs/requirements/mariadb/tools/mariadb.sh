@@ -26,19 +26,19 @@ DB_USER_PASSWORD=$(cat "$USER_PWD_FILE")
 # Ensure expected ownership (volume may carry host UID/GID differences).
 chown -R mysql:mysql /var/lib/mysql /run/mysqld
 
-# --- First-run initialisation ----------------------------------------------
-if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE}" ]; then
-  echo "[mariadb] Creating missing database ${MYSQL_DATABASE}" >&2
-  TMP_SQL=$(mktemp)
-  cat > "$TMP_SQL" <<EOF
+# --- Idempotent bootstrap ---------------------------------------------------
+# Apply DB/user/grants on every container start so stale volumes are recovered.
+echo "[mariadb] Ensuring database/user grants for ${MYSQL_DATABASE}" >&2
+TMP_SQL=$(mktemp)
+cat > "$TMP_SQL" <<EOF
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
+ALTER USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${DB_USER_PASSWORD}';
 GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
-  mysqld --user=mysql --datadir=/var/lib/mysql --bootstrap < "$TMP_SQL"
-  rm -f "$TMP_SQL"
-fi
+mysqld --user=mysql --datadir=/var/lib/mysql --bootstrap < "$TMP_SQL"
+rm -f "$TMP_SQL"
 
 echo "[mariadb] Starting server" >&2
 exec mysqld_safe --user=mysql --datadir=/var/lib/mysql --console
