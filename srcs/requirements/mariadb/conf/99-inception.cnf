@@ -14,5 +14,4 @@ character-set-server = utf8mb4
 collation-server     = utf8mb4_unicode_ci
 
 # --- Sensible container defaults ---
-skip-name-resolve
 innodb_file_per_table = 1
