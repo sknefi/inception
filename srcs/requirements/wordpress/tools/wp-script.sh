@@ -6,7 +6,7 @@ DB_PASS_FILE=/run/secrets/db_password
 ADMIN_PASS_FILE=/run/secrets/wp_admin_password
 USER_PASS_FILE=/run/secrets/wp_user_password
 
-# Fail fast if any secret is missing/empty.
+# Fail fast if any secret is missing/empty
 for f in "$DB_PASS_FILE" "$ADMIN_PASS_FILE" "$USER_PASS_FILE"; do
   [ -s "$f" ] || { echo "[wp] Missing secret $f" >&2; exit 1; }
 done
@@ -33,7 +33,7 @@ until mysqladmin ping -h "$DB_HOST" --silent; do
   sleep 2
 done
 
-# Avoid race with MariaDB init: wait until app credentials can query target DB.
+# Avoid race with MariaDB init: wait until app credentials can query target DB
 echo "[wp] Waiting for DB credentials to be ready..." >&2
 until mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "SELECT 1" >/dev/null 2>&1; do
   sleep 2
@@ -55,7 +55,7 @@ if [ ! -f wp-config.php ]; then
     --dbprefix="$DB_PREFIX" --skip-check
 fi
 
-# Keep config in sync with current env/secrets even if volume already existed.
+# Keep config in sync with current env/secrets even if volume already existed
 wp config set DB_NAME "$DB_NAME" --allow-root
 wp config set DB_USER "$DB_USER" --allow-root
 wp config set DB_PASSWORD "$DB_PASSWORD" --allow-root
