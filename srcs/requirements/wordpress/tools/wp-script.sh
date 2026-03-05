@@ -47,9 +47,15 @@ if [ ! -f wp-config.php ]; then
   wp config create --allow-root \
     --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost="$DB_HOST" \
     --dbprefix="$DB_PREFIX" --skip-check
-  wp config set WP_HOME "$SITE_URL" --allow-root
-  wp config set WP_SITEURL "$SITE_URL" --allow-root
 fi
+
+# Keep config in sync with current env/secrets even if volume already existed.
+wp config set DB_NAME "$DB_NAME" --allow-root
+wp config set DB_USER "$DB_USER" --allow-root
+wp config set DB_PASSWORD "$DB_PASSWORD" --allow-root
+wp config set DB_HOST "$DB_HOST" --allow-root
+wp config set WP_HOME "$SITE_URL" --allow-root
+wp config set WP_SITEURL "$SITE_URL" --allow-root
 
 # Install WP only once
 if ! wp core is-installed --allow-root >/dev/null 2>&1; then
