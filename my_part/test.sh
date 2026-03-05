@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# test to run only mariadb
+# just put this file to inception/ (project root)
+
 docker run --rm -it --name mariadb \
   --env-file srcs/.env \
   -v "$PWD/secrets/db_root_password.txt":/run/secrets/db_root_password.txt:ro \
