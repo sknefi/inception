@@ -1,6 +1,11 @@
-secrets/*.txt
 !secrets/.gitkeep
 
 # OS/editor
 .DS_Store
 *.swp
+
+# env file
+srcs/.env
+
+# passwords
+secrets/*.txt
