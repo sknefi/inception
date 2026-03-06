@@ -31,9 +31,9 @@ sleep 5
 
 ROOT_AUTH_MODE=""
 # Support both first boot (root without password) and restarted boot (root with password)
-if mariadb -u root -p"${MYSQL_ROOT_PASSWORD}" -e "SELECT 1" >/dev/null 2>&1; then
+if mariadb --no-defaults -u root -p"${MYSQL_ROOT_PASSWORD}" -e "SELECT 1" >/dev/null 2>&1; then
   ROOT_AUTH_MODE="password"
-elif mariadb -u root -e "SELECT 1" >/dev/null 2>&1; then
+elif mariadb --no-defaults -u root -e "SELECT 1" >/dev/null 2>&1; then
   ROOT_AUTH_MODE="no_password"
 else
   echo "[mariadb] Cannot authenticate as root (with or without password)" >&2
@@ -43,16 +43,20 @@ fi
 # Small helper to execute SQL with the correct root auth mode
 run_sql() {
   if [ "$ROOT_AUTH_MODE" = "password" ]; then
-    mariadb -u root -p"${MYSQL_ROOT_PASSWORD}" -e "$1"
+    mariadb --no-defaults -u root -p"${MYSQL_ROOT_PASSWORD}" -e "$1"
   else
-    mariadb -u root -e "$1"
+    mariadb --no-defaults -u root -e "$1"
   fi
 }
 
-# On first run, set the root password before running privileged SQL
-if [ "$ROOT_AUTH_MODE" = "no_password" ]; then
-  run_sql "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
-  ROOT_AUTH_MODE="password"
+# Enforce root password auth on every boot (disable socket auth for evaluators)
+run_sql "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('${MYSQL_ROOT_PASSWORD}');"
+ROOT_AUTH_MODE="password"
+
+# Sanity check: root must not be able to login without a password
+if mariadb --no-defaults -u root -e "SELECT 1" >/dev/null 2>&1; then
+  echo "[mariadb] Root login without password is still enabled" >&2
+  exit 1
 fi
 
 # Idempotent setup: safe to run on every container start
@@ -63,7 +67,7 @@ run_sql "GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 run_sql "FLUSH PRIVILEGES;"
 
 # Stop background bootstrap instance; then launch main foreground process (PID 1)
-mysqladmin -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
+mysqladmin --no-defaults -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
 
 echo "[mariadb] Starting server" >&2
 exec mysqld_safe --user=mysql --datadir=/var/lib/mysql --console
