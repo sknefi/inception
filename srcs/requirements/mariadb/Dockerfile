@@ -1,4 +1,4 @@
-FROM	debian:bullseye
+FROM debian:bullseye
 
 RUN	apt-get update && \
 	apt-get install -y mariadb-server mariadb-client ca-certificates && \
@@ -12,6 +12,6 @@ COPY tools/mariadb.sh /usr/local/bin/mariadb.sh
 
 RUN	chmod +x /usr/local/bin/mariadb.sh
 
-EXPOSE	3306
+EXPOSE 3306
 
 CMD ["/usr/local/bin/mariadb.sh"]

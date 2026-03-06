@@ -2,7 +2,7 @@ FROM debian:bullseye
 
 RUN apt-get update && \
     apt-get install -y nginx openssl && \
-    rm -rf /var/lib/apt/lists/*  # slim image
+    rm -rf /var/lib/apt/lists/*
 
 RUN rm -f /etc/nginx/sites-enabled/default
 

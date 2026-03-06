@@ -1,6 +1,5 @@
-# secrets must never be committed
-# secrets/*.txt
-# !secrets/.gitkeep
+secrets/*.txt
+!secrets/.gitkeep
 
 # OS/editor
 .DS_Store
